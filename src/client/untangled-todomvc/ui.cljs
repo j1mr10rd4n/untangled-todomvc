@@ -66,11 +66,11 @@
 
 (defui ^:once TodoList
   static om/IQuery
-  (query [this] [{:todos (om/get-query TodoItem)}
+  (query [this] [:ui/react-key {:todos (om/get-query TodoItem)}
                  :todos/filter])
   Object
   (render [this]
-    (let [{:keys [todos todos/filter]} (om/props this)
+    (let [{:keys [ui/react-key todos todos/filter]} (om/props this)
           num-todos (count todos)
           completed-todos (filterv :completed todos)
           num-completed (count completed-todos)
@@ -82,7 +82,7 @@
           delete-item (fn [item-id] (om/transact! this `[(todo/delete-item ~{:id item-id})]))
           toggle-complete (fn [item-id] (om/transact! this `[(todo/toggle-complete ~{:id item-id})]))]
 
-      (dom/div nil
+      (dom/div #js {:key react-key}
         (dom/section #js {:className "todoapp"}
           (.header this)
           (when (pos? num-todos)
@@ -110,7 +110,7 @@
       (dom/header #js {:className "header"}
         (dom/h1 nil "todos")
         (dom/input #js {:className   "new-todo"
-                        :placeholder "What needs to be done, now?"
+                        :placeholder "What needs to be done?"
                         :autoFocus   true
                         :onKeyDown   add-item}))))
 
