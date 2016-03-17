@@ -110,7 +110,7 @@
       (dom/header #js {:className "header"}
         (dom/h1 nil "todos")
         (dom/input #js {:className   "new-todo"
-                        :placeholder "What needs to be done?"
+                        :placeholder "What needs to be done, now?"
                         :autoFocus   true
                         :onKeyDown   add-item}))))
 
