@@ -6,8 +6,8 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.228"]
-                 [org.omcljs/om "1.0.0-alpha40"]
-                 [navis/untangled-client "0.5.3"]
+                 [org.omcljs/om "1.0.0-alpha41"]
+                 [navis/untangled-client "0.5.5-SNAPSHOT"]
                  [secretary "1.2.3" :exclusions [com.cemerick/clojurescript.test]]
                  [navis/untangled-spec "0.3.5" :scope "test"]]
 
