@@ -5,24 +5,24 @@
             :url  "https://opensource.org/licenses/MIT"}
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.8.51"]
-                 [org.omcljs/om "1.0.0-alpha40"]
-                 [navis/untangled-client "0.5.3"]
+                 [org.clojure/clojurescript "1.9.229"]
+                 [org.omcljs/om "1.0.0-alpha46"]
+                 [navis/untangled-client "0.5.8-SNAPSHOT"]
                  [navis/untangled-server "0.6.1" :exclusions [io.aviso/pretty org.clojure/clojurescript]]
                  [navis/untangled-datomic "0.4.9" :exclusions [org.clojure/tools.cli]]
                  [com.datomic/datomic-free "0.9.5359" :exclusions [com.google.guava/guava]]
                  [secretary "1.2.3" :exclusions [com.cemerick/clojurescript.test]]
                  [joda-time "2.9.3"]
                  [clj-time "0.11.0"]
-                 [lein-doo "0.1.6" :scope "test" :exclusions [org.clojure/tools.reader]]
+                 [lein-doo "0.1.7" :scope "test" :exclusions [org.clojure/tools.reader]]
                  [org.clojure/tools.namespace "0.2.11"]
                  [commons-codec "1.10"]
                  [com.taoensso/timbre "4.3.1"]
                  [com.stuartsierra/component "0.3.1"]
                  [navis/untangled-spec "0.3.6" :scope "test"]]
 
-  :plugins [[lein-cljsbuild "1.1.3"]
-            [lein-doo "0.1.6" :exclusions [org.clojure/tools.reader]]
+  :plugins [[lein-cljsbuild "1.1.4"]
+            [lein-doo "0.1.7" :exclusions [org.clojure/tools.reader]]
             [navis/untangled-lein-i18n "0.1.2" :exclusions [org.codehaus.plexus/plexus-utils org.clojure/tools.cli org.apache.maven.wagon/wagon-provider-api]]]
 
   :doo {:build "automated-tests"
@@ -99,7 +99,7 @@
                                   :port             7001
                                   }
                    :env          {:dev true}
-                   :dependencies [[figwheel-sidecar "0.5.3-1" :exclusions [ring/ring-core]]
+                   :dependencies [[figwheel-sidecar "0.5.7" :exclusions [ring/ring-core]]
                                   [juxt/dirwatch "0.2.3"]
                                   [binaryage/devtools "0.6.1" :exclusions [environ]]
                                   [com.cemerick/piggieback "0.2.1"]
