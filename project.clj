@@ -21,7 +21,7 @@
                  [com.stuartsierra/component "0.3.1"]
                  [navis/untangled-spec "0.3.6" :scope "test"]]
 
-  :plugins [[lein-cljsbuild "1.1.3"]
+  :plugins [[lein-cljsbuild "1.1.5"]
             [lein-doo "0.1.6" :exclusions [org.clojure/tools.reader]]
             [navis/untangled-lein-i18n "0.1.2" :exclusions [org.codehaus.plexus/plexus-utils org.clojure/tools.cli org.apache.maven.wagon/wagon-provider-api]]]
 
@@ -35,7 +35,8 @@
                    }
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target" "i18n/out"]
-  :source-paths ["dev/server" "dev/watcher" "src/client" "src/server" "specs/client" "specs/server"]
+  :source-paths ["src/server"]
+  :test-paths ["src/server" "specs/server"]
 
   :cljsbuild {:builds [{:id           "dev"
                         :source-paths ["dev/client" "src/client"]
@@ -93,6 +94,7 @@
 
   :profiles {
              :dev {
+                   :source-paths ["dev/server" "dev/watcher" "src/server"]
                    :repl-options {
                                   :init-ns          user
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
