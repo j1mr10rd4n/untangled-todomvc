@@ -27,5 +27,3 @@
             (if (= 0 (count keywords))
               app-state
               (select-keys app-state keywords)))))
-
-

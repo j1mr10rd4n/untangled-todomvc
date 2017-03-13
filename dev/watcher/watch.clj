@@ -1,6 +1,7 @@
 (ns watch
-  (:require [juxt.dirwatch :as dw]
-            [taoensso.timbre :as timbre]))
+  (:require
+    [juxt.dirwatch :as dw]
+    [taoensso.timbre :as timbre]))
 
 (def watcher (atom nil))
 (def reset-fn (atom nil))

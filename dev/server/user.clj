@@ -4,33 +4,23 @@
     [clojure.pprint :refer (pprint)]
     [clojure.stacktrace :refer (print-stack-trace)]
     [clojure.tools.namespace.repl :refer [disable-reload! refresh clear set-refresh-dirs]]
-    [com.stuartsierra.component :as component]
-    [figwheel-sidecar.repl-api :as ra]
+    [com.stuartsierra.component :as cp]
+    [figwheel-sidecar.system :as fsys]
     [taoensso.timbre :refer [info set-level!] :as timbre]
     [todomvc.system :as system]
-    [watch :refer [start-watching stop-watching reset-fn]]
-    [juxt.dirwatch :as dw]))
-
+    [watch :refer [start-watching stop-watching reset-fn]]))
 
 ;;FIGWHEEL
 
-(def figwheel-config
-  {:figwheel-options {:css-dirs ["resources/public/css"]}
-   :build-ids        ["dev" "support"]
-   :all-builds       (figwheel-sidecar.repl/get-project-cljs-builds)})
-
 (defn start-figwheel
   "Start Figwheel on the given builds, or defaults to build-ids in `figwheel-config`."
-  ([]
-   (let [props (System/getProperties)
-         all-builds (->> figwheel-config :all-builds (mapv :id))]
-     (start-figwheel (keys (select-keys props all-builds)))))
+  ([] (->> (fsys/fetch-config) :all-builds (mapv :id)
+        (select-keys (System/getProperties)) keys
+        start-figwheel))
   ([build-ids]
-   (let [default-build-ids (:build-ids figwheel-config)
-         build-ids (if (empty? build-ids) default-build-ids build-ids)]
-     (println "STARTING FIGWHEEL ON BUILDS: " build-ids)
-     (ra/start-figwheel! (assoc figwheel-config :build-ids build-ids))
-     (ra/cljs-repl))))
+   (-> (fsys/fetch-config)
+     (assoc-in [:data :build-ids] build-ids)
+     fsys/figwheel-system cp/start fsys/cljs-repl)))
 
 ;;SERVER
 
@@ -45,11 +35,11 @@
   []
   (reset! system (system/make-system)))
 
-(defn start "Start (an already initialized) web server." [] (swap! system component/start))
+(defn start "Start (an already initialized) web server." [] (swap! system cp/start))
 
 (defn stop "Stop the running web server. Is a no-op if the server is already stopped" []
   (when @system
-    (swap! system component/stop)
+    (swap! system cp/stop)
     (reset! system nil)))
 
 (defn go "Load the overall web server system and start it." []

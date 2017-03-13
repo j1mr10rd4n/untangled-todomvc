@@ -1,15 +1,17 @@
 (ns untangled-todomvc.core
-  (:require [untangled.client.core :as uc]
-            [untangled-todomvc.ui :as ui]
-            [untangled-todomvc.routing :refer [configure-routing!]]
-            [goog.events :as events]
-            [secretary.core :as secretary :refer-macros [defroute]]
-            [goog.history.EventType :as EventType]
-            [om.next :as om]
-            untangled-todomvc.i18n.locales
-            untangled-todomvc.i18n.default-locale
-            [untangled.client.logging :as log]
-            [untangled.client.data-fetch :as df])
+  (:require
+    [goog.events :as events]
+    [goog.history.EventType :as EventType]
+    [om.next :as om]
+    [secretary.core :as secretary :refer-macros [defroute]]
+    [untangled-todomvc.i18n.default-locale]
+    [untangled-todomvc.i18n.locales]
+    [untangled-todomvc.routing :refer [configure-routing!]]
+    [untangled-todomvc.ui :as ui]
+    [untangled.client.core :as uc]
+    [untangled.client.data-fetch :as df]
+    [untangled.client.logging :as log]
+    [untangled.client.mutations :as m])
   (:import goog.History))
 
 (defn get-url
@@ -28,11 +30,21 @@
   ([url param-name]
    (get (uri-params url) param-name)))
 
+(m/defmutation merge-todos [_]
+  (action [{:keys [state]}]
+    (swap! state
+      #(let [todo-list (get @state :todo-list)]
+         (-> %
+           (update :todos merge todo-list)
+           (dissoc :todo-list))))))
+
 (defn on-app-started [app]
   (let [reconciler (:reconciler app)
         state (om/app-state reconciler)
         list (:list @state)]
-    (df/load-data reconciler (om/get-query ui/Root) :without #{:list/filter} :params {:todos {:list list}})
+    (df/load reconciler :todo-list ui/TodoList
+      {:without #{:list/filter} :params {:list list}
+       :refresh [:todos] :post-mutation `merge-todos})
     (configure-routing! reconciler))
   (let [h (History.)]
     (events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
@@ -44,5 +56,3 @@
                                              :list/items  []
                                              :list/filter :none}}
                      :started-callback on-app-started)))
-
-

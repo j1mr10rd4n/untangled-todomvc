@@ -1,8 +1,10 @@
 (ns todomvc.api
-  (:require [om.next.server :as om]
-            [datomic.api :as d]
-            [untangled.datomic.protocols :as db]
-            [taoensso.timbre :as timbre]))
+  (:require
+    [om.next.server :as om]
+    [datomic.api :as d]
+    [taoensso.timbre :as timbre]
+    [untangled-todomvc.mutations :as mut]
+    [untangled.datomic.protocols :as db]))
 
 (defmulti apimutate om/dispatch)
 
@@ -12,7 +14,7 @@
 (defonce last-id (atom 1000))
 (defonce requests (atom {}))
 
-(defmethod apimutate 'support-viewer/send-support-request [e k p]
+(defmethod apimutate `mut/send-support-request [e k p]
   {:action
    (fn []
      (let [_ (swap! last-id inc)
@@ -42,7 +44,7 @@
     eid
     (make-list conn list-name)))
 
-(defmethod apimutate 'todo/new-item [{:keys [todo-database]} _ {:keys [id text list]}]
+(defmethod apimutate `mut/add-todo [{:keys [todo-database]} _ {:keys [id text list]}]
   {:action #(let [connection (db/get-connection todo-database)
                   datomic-id (d/tempid :db.part/user)
                   omid->tempid {id datomic-id}
@@ -53,19 +55,19 @@
                   omids->realids (resolve-ids (d/db connection) omid->tempid tempid->realid)]
              {:tempids omids->realids})})
 
-(defmethod apimutate 'todo/check [{:keys [todo-database]} _ {:keys [id]}]
+(defmethod apimutate `mut/check-todo [{:keys [todo-database]} _ {:keys [id]}]
   {:action #(let [connection (db/get-connection todo-database)
                   tx [[:db/add id :item/complete true]]]
              @(d/transact connection tx)
              true)})
 
-(defmethod apimutate 'todo/uncheck [{:keys [todo-database]} _ {:keys [id]}]
+(defmethod apimutate `mut/uncheck-todo [{:keys [todo-database]} _ {:keys [id]}]
   {:action #(let [connection (db/get-connection todo-database)
                   tx [[:db/add id :item/complete false]]]
              @(d/transact connection tx)
              true)})
 
-(defmethod apimutate 'todo/edit [{:keys [todo-database]} _ {:keys [id text]}]
+(defmethod apimutate `mut/edit-todo [{:keys [todo-database]} _ {:keys [id text]}]
   {:action #(let [connection (db/get-connection todo-database)
                   tx [[:db/add id :item/label text]]]
              @(d/transact connection tx)
@@ -80,19 +82,19 @@
     @(d/transact connection tx)
     true))
 
-(defmethod apimutate 'todo/check-all [{:keys [todo-database]} _ {:keys [id]}]
+(defmethod apimutate `mut/check-all-todos [{:keys [todo-database]} _ {:keys [id]}]
   {:action #(let [connection (db/get-connection todo-database)] (set-checked connection id true))})
 
-(defmethod apimutate 'todo/uncheck-all [{:keys [todo-database]} _ {:keys [id]}]
+(defmethod apimutate `mut/uncheck-all-todos [{:keys [todo-database]} _ {:keys [id]}]
   {:action #(let [connection (db/get-connection todo-database)] (set-checked connection id false))})
 
-(defmethod apimutate 'todo/delete-item [{:keys [todo-database]} _ {:keys [id]}]
+(defmethod apimutate `mut/delete-todo [{:keys [todo-database]} _ {:keys [id]}]
   {:action #(let [connection (db/get-connection todo-database)
                   tx [[:db.fn/retractEntity id]]]
              @(d/transact connection tx)
              true)})
 
-(defmethod apimutate 'todo/clear-complete [{:keys [todo-database]} _ {:keys [id]}]
+(defmethod apimutate `mut/clear-complete-todos [{:keys [todo-database]} _ {:keys [id]}]
   {:action #(let [connection (db/get-connection todo-database)
                   ids (d/q '[:find [?e ...] :in $ ?list-name
                              :where
@@ -108,17 +110,16 @@
     (string? n) (Integer/parseInt n)
     :else n))
 
-(defn read-list [connection query nm]
-  (let [list-id (find-list connection nm)
-        db (d/db connection)
-        rv (d/pull db query list-id)]
-    rv))
+(defn read-list [connection query list-name]
+  (let [list-id (find-list connection list-name)
+        db (d/db connection)]
+    (d/pull db query list-id)))
 
 (defn api-read [{:keys [todo-database query] :as env} k {:keys [list] :as params}]
   (let [connection (db/get-connection todo-database)]
-    (timbre/info "Query: " query)
+    (timbre/info "Query:" query ", with params:" params)
     (case k
-      :todos {:value (read-list connection query list)}
+      :todo-list {:value (read-list connection query list)}
       :support-request (let [id (:id params)]
                          (timbre/info "Sending history for " id)
                          {:value (get @requests (ensure-integer id))})
