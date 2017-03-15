@@ -15,7 +15,7 @@
 (m/defmutation add-todo [{:keys [id text]}]
   (action [{:keys [state]}]
     (swap! state #(-> %
-                    (update-in [:todos :list/items] (fn [todos] ((fnil conj []) todos [:todo/by-id id])))
+                    (update-in [:todo-list/by-id (:list %) :list/items] (fn [todos] ((fnil conj []) todos [:todo/by-id id])))
                     (assoc-in [:todo/by-id id] {:db/id id :item/label text}))))
   (remote [{:keys [state ast]}]
     (assoc ast :params {:id id :text text :list (:list @state)})))
@@ -39,7 +39,7 @@
   (action [{:keys [state]}]
     (letfn [(remove-item [todos] (vec (remove #(= id (second %)) todos)))]
       (swap! state #(-> %
-                      (update-in [:todos :list/items] remove-item)
+                      (update-in [:todo-list/by-id (:list %) :list/items] remove-item)
                       (update :todo/by-id dissoc id)))))
   (remote [_] true))
 
@@ -63,7 +63,7 @@
     (swap! state
       (fn [st]
         (-> st
-          (update-in [:todos :list/items]
+          (update-in [:todo-list/by-id (:list st) :list/items]
             (fn [todos]
               (vec (remove
                      (fn [[_ id]]
@@ -74,4 +74,4 @@
 
 (m/defmutation set-todo-filter [{:keys [todo-filter]}]
   (action [{:keys [state]}]
-    (swap! state assoc-in [:todos :list/filter] todo-filter)))
+    (swap! state assoc-in [:todo-list/by-id (:list @state) :list/filter] todo-filter)))

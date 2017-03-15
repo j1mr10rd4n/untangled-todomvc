@@ -119,7 +119,7 @@
   (let [connection (db/get-connection todo-database)]
     (timbre/info "Query:" query ", with params:" params)
     (case k
-      :todo-list {:value (read-list connection query list)}
+      :todos {:value (read-list connection query list)}
       :support-request (let [id (:id params)]
                          (timbre/info "Sending history for " id)
                          {:value (get @requests (ensure-integer id))})

@@ -7,7 +7,7 @@
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/clojurescript "1.9.473"]
                  [org.omcljs/om "1.0.0-alpha48"]
-                 [navis/untangled-client "0.8.0"]
+                 [navis/untangled-client "0.8.1-SNAPSHOT"]
                  [navis/untangled-server "0.7.0" :exclusions [io.aviso/pretty org.clojure/clojurescript]]
                  [navis/untangled-datomic "0.4.11" :exclusions [org.clojure/tools.cli]]
                  [com.datomic/datomic-free "0.9.5561" :exclusions [com.google.guava/guava]]
@@ -31,11 +31,10 @@
   :untangled-i18n {:default-locale        "en-US"
                    :translation-namespace untangled-todomvc.i18n
                    :source-folder         "src/client"
-                   :target-build          "i18n"
-                   }
+                   :target-build          "i18n"}
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target" "i18n/out"]
-  :source-paths ["src/server"]
+  :source-paths ["src/server" "src/client"]
   :test-paths ["src/server" "specs/server"]
 
   :cljsbuild {:builds [{:id           "dev"
@@ -92,17 +91,12 @@
   :figwheel {:css-dirs    ["resources/public/css"]
              :server-port 2345}
 
-  :profiles {
-             :dev {
-                   :source-paths ["dev/server" "dev/watcher" "src/server"]
-                   :repl-options {
-                                  :init-ns          user
+  :profiles {:dev {:source-paths ["dev/server" "dev/watcher" "src/server"]
+                   :repl-options {:init-ns          user
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
-                                  :port             7001
-                                  }
-                   :env          {:dev true}
+                                  :port             7001}
                    :dependencies [[figwheel-sidecar "0.5.9" :exclusions [ring/ring-core]]
                                   [juxt/dirwatch "0.2.3"]
-                                  [binaryage/devtools "0.9.2" :exclusions [environ]]
+                                  [binaryage/devtools "0.9.2"]
                                   [com.cemerick/piggieback "0.2.1"]
                                   [org.clojure/tools.nrepl "0.2.12"]]}})

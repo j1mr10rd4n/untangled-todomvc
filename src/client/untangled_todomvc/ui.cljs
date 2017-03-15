@@ -1,11 +1,13 @@
 (ns untangled-todomvc.ui
   (:require
+    [om.dom :as dom]
     [om.next :as om :refer-macros [defui]]
     [untangled-todomvc.mutations :as mut]
+    [untangled-todomvc.routing :as routing]
+    [untangled.client.core :as uc]
     [untangled.client.mutations :as m]
     [untangled.i18n :refer-macros [tr trf]]
-    yahoo.intl-messageformat-with-locales
-    [om.dom :as dom]))
+    [yahoo.intl-messageformat-with-locales]))
 
 (defn is-enter? [evt] (= 13 (.-keyCode evt)))
 (defn is-escape? [evt] (= 27 (.-keyCode evt)))
@@ -71,11 +73,17 @@
 (def ui-todo-item (om/factory TodoItem {:keyfn :db/id}))
 
 (defui ^:once TodoList
+  static uc/InitialAppState
+  (initial-state [_ _] {:list/title  ""
+                        :list/items  []
+                        :list/filter :none})
   static om/IQuery
   (query [this] [:db/id
                  {:list/items (om/get-query TodoItem)}
                  :list/title
                  :list/filter])
+  static om/Ident
+  (ident [_ props] [:todo-list/by-id (or (routing/get-url-param "list") "main")])
   Object
   (render [this]
     (let [{:keys [list/items list/filter list/title db/id]} (om/props this)
@@ -128,7 +136,6 @@
   (filter-footer [this num-todos num-completed]
     (let [{:keys [list/filter]} (om/props this)
           num-remaining (- num-todos num-completed)]
-      (js/console.log "FILTER:" filter)
       (dom/footer #js {:className "footer"}
         (dom/span #js {:className "todo-count"}
           (dom/strong nil (trf "{num,plural,=0 {no items} =1 {1 item} other {# items}} left" :num num-remaining)))
@@ -159,6 +166,9 @@
 (def ui-todo-list (om/factory TodoList))
 
 (defui ^:once Root
+  static uc/InitialAppState
+  (initial-state [this _] {:list  (or (routing/get-url-param "list") "main")
+                           :todos (uc/get-initial-state TodoList {})})
   static om/IQuery
   (query [this] [:ui/support-visible :ui/react-key :ui/locale {:todos (om/get-query TodoList)}])
   Object
