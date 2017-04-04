@@ -11,13 +11,13 @@
     [watch :refer [start-watching stop-watching reset-fn]]))
 
 ;;FIGWHEEL
-
 (defn start-figwheel
   "Start Figwheel on the given builds, or defaults to build-ids in `figwheel-config`."
-  ([] (->> (fsys/fetch-config) :all-builds (mapv :id)
-        (select-keys (System/getProperties)) keys
+  ([] (->> (fsys/fetch-config) :data :all-builds
+        (mapv :id) (select-keys (System/getProperties)) keys
         start-figwheel))
   ([build-ids]
+   (println build-ids)
    (-> (fsys/fetch-config)
      (assoc-in [:data :build-ids] build-ids)
      fsys/figwheel-system cp/start fsys/cljs-repl)))
@@ -53,3 +53,7 @@
   (refresh :after 'user/go))
 
 (reset! watch/reset-fn reset)
+
+(comment
+  (System/getProperty "boo")
+  (keys (select-keys (System/getProperties) ["boo"])))
