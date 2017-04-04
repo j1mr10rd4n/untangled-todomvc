@@ -1,6 +1,6 @@
 (ns untangled-todomvc.core
   (:require
-    [goog.events :as events]
+    [goog.events :as events
     [goog.history.EventType :as EventType]
     [om.next :as om]
     [secretary.core :as secretary :refer-macros [defroute]]
@@ -26,3 +26,7 @@
     (doto h (.setEnabled true))))
 
 (defonce app (atom (uc/new-untangled-client :started-callback on-app-started)))
+
+(m/defmutation send-support-request [{:keys [comment]}]
+  (remote [{:as env :keys [ast]}]
+    (assoc ast :params {:comment comment :history (uc/history @app)})))

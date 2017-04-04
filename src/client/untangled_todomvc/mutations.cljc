@@ -4,10 +4,6 @@
     [untangled.dom :refer [unique-key]]
     [untangled.client.core :as uc]))
 
-(m/defmutation send-support-request [{:keys [comment]}]
-  (remote [{:as env :keys [ast]}]
-    (assoc ast :params {:comment comment :history #?(:clj nil :cljs (uc/history @untangled-todomvc.core/app))})))
-
 (m/defmutation toggle-support-request [_]
   (action [{:keys [state]}]
     (swap! state update :ui/support-visible not)))
